@@ -1,103 +1,114 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { CUISINES } from './lib/constants';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cuisine, setCuisine] = useState('');
+  const [prepTime, setPrepTime] = useState('');
+
+  const isNextEnabled =
+    searchQuery.trim() !== '' || cuisine !== '' || prepTime !== '';
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const searchParams = new URLSearchParams();
+
+    if (searchQuery) searchParams.set('query', searchQuery);
+    if (cuisine) searchParams.set('cuisine', cuisine);
+    if (prepTime) searchParams.set('prepTime', String(prepTime));
+
+    router.push(`/recipes?${searchParams.toString()}`);
+  };
+
+  return (
+    <div className='min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center justify-center px-4 py-12'>
+      <main className='w-full max-w-md bg-white rounded-2xl shadow-sm p-6 sm:p-8 space-y-6'>
+        <div className='text-center'>
+          <h1 className='text-3xl font-bold text-primary mb-2'>
+            Recipe Finder
+          </h1>
+          <p className='text-gray-600 text-sm'>Find your favorite recipes</p>
         </div>
+
+        <form onSubmit={handleFormSubmit} className='space-y-4'>
+          <div>
+            <label
+              htmlFor='query'
+              className='block text-sm font-medium text-gray-700 mb-1'
+            >
+              Recipe Name
+            </label>
+            <input
+              id='query'
+              type='text'
+              placeholder='e.g. pasta, salad...'
+              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none text-sm'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor='cuisine'
+              className='block text-sm font-medium text-gray-700 mb-1'
+            >
+              Cuisine
+            </label>
+            <select
+              id='cuisine'
+              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none text-sm'
+              value={cuisine}
+              onChange={(e) => setCuisine(e.target.value)}
+            >
+              <option value=''>Select Cuisine</option>
+              {CUISINES.map((cuisine) => (
+                <option key={cuisine} value={cuisine.toLowerCase()}>
+                  {cuisine}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor='prep-time'
+              className='block text-sm font-medium text-gray-700 mb-1'
+            >
+              Max Prep Time (minutes)
+            </label>
+            <input
+              id='prep-time'
+              type='number'
+              min='1'
+              placeholder='e.g. 30'
+              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none text-sm'
+              value={prepTime}
+              onChange={(e) => setPrepTime(e.target.value)}
+            />
+          </div>
+
+          <button
+            type='submit'
+            className={`w-full py-2.5 text-sm font-medium rounded-lg transition-all duration-300
+            ${
+              isNextEnabled
+                ? 'bg-amber-200 text-black hover:bg-primary__pressed shadow-sm active:scale-95'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }
+          `}
+            disabled={!isNextEnabled}
+          >
+            Next
+          </button>
+        </form>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
